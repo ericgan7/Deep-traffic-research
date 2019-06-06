@@ -12,7 +12,7 @@ def webcrawler(url, content):
     profile.set_preference("browser.helperApps.neverAsk.openFile","text/csv,application/vnd.ms-excel")
     profile.set_preference("browser.helperApps.neverAsk.saveToDisk", "text/csv,application/vnd.ms-excel")
     profile.set_preference("browser.download.folderList", 2);
-    profile.set_preference("browser.download.dir", "/home/ao1385@ubuntu/Downloads")
+    profile.set_preference("browser.download.dir", "")
 
     #start a remote browser
     browser = webdriver.Firefox(profile)
@@ -22,8 +22,8 @@ def webcrawler(url, content):
     browser.get(URL + content)
 
     #login
-    browser.find_element_by_id("username").send_keys("ao1385@nyu.edu")
-    browser.find_element_by_id ("password").send_keys("11green!*Wca")
+    browser.find_element_by_id("username").send_keys("")
+    browser.find_element_by_id ("password").send_keys("")
     browser.find_element_by_name("login").click()
 
 

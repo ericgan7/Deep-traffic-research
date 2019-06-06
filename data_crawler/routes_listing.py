@@ -14,8 +14,8 @@ tab = "route_list"
 browser.get(URL + "content=" + content + "&tab=" + tab)
 
 #login
-browser.find_element_by_id("username").send_keys("ao1385@nyu.edu")
-browser.find_element_by_id ("password").send_keys("11green!*Wca")
+browser.find_element_by_id("username").send_keys("")
+browser.find_element_by_id ("password").send_keys("")
 browser.find_element_by_name("login").click()
 
 #wait until the table fully loads
