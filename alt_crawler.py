@@ -1,4 +1,5 @@
 from selenium import webdriver
+from selenium.webdriver.common.action_chains import ActionChains
 import urllib
 from urllib.parse import urlsplit, quote_plus
 from selenium.webdriver.common.by import By as WebBy
@@ -22,7 +23,7 @@ import cv2 as cv
 class Crawler():
     def __init__(self):
         self.urls = [
-            "http://www.dot.ca.gov/d4/d4cameras/ct-cam-pop-E4_at_Laurel_Rd.html"
+            "http://www.dot.ca.gov/dist8/tmc/cctvhtm/cctv809409.html"
         ]
         self.width = 300
         self.height = 500
@@ -63,6 +64,7 @@ class Crawler():
             for t in self.threads:
                 t.driver.close()
 
+    ## TODO MODIFY CROP DIMENSIONS
     def GetCropDim(self):
         temp = Screenshot(0, self.urls[0], self.options, self.width, self.height, dim = None)
         temp.initialize_browser()
@@ -79,9 +81,9 @@ class Crawler():
             y_start += 1
         self.dim[0] = y_start
         #find y_end
-        for i in range(x_mid, x_mid + 100):
-            while (img.item(y_end, i, 0) == 255):
-                y_end -= 1
+        y_end = y_start
+        while(img.item((y_end, x_mid, 0)) != 255):
+            y_end += 1
         self.dim[1] = y_end
         #find x_start and x_end
         for i in range(y_start, y_start +100):
@@ -136,12 +138,13 @@ class Screenshot(threading.Thread):
         WebSelect(root11).select_by_value("allow")
 
     def run(self):
-        self.initialize_browser(True)
+        self.initialize_browser()
         while (True):
             t = datetime.datetime.now()
-            name = "data/video/{7},{0}-{1}-{2},{3}-{4}-{5}-{6}.png".format(t.year, t.month, t.day, t.hour, t.minute, t.second, t.microsecond, self.url[35:])
+            name = "data/video/{7},{0}-{1}-{2},{3}-{4}-{5}-{6}.png".format(t.year, t.month, t.day, t.hour, t.minute, t.second, t.microsecond, "test")
             img = self.get_image()
             self.crop(img, self.dim[0], self.dim[1], self.dim[2], self.dim[3], name)
+            
 
     def get_image(self):
         png = self.driver.get_screenshot_as_png()
@@ -157,8 +160,10 @@ class Screenshot(threading.Thread):
         self.allow_flash(self.driver, self.url)
         self.driver.set_window_size(self.w, self.h)
         self.driver.get(self.url)
-        time.sleep(4)
         self.driver.find_element_by_tag_name("embed").click()
+        ActionChains(self.driver).move_to_element(self.driver.find_element_by_id("video")).perform()
+        time.sleep(1.0)
+        ActionChains(self.driver).move_by_offset( -140,103).click().perform()
         while(not self.ready()):
             pass
         print("{0} Ready".format(self.thread_ID))
@@ -168,7 +173,8 @@ class Screenshot(threading.Thread):
     def crop(self, image, y0, y1, x0,x1, image_name):
         crop_image = image[y0:y1, x0:x1]
         if (self.valid(crop_image)):
-            cv.imwrite(image_name, crop_image)
+            #cv.imwrite(image_name, crop_image)
+            print("save at {0}".format(image_name))
         else:
             self.driver.close()
             self.initialize_browser()

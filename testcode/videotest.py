@@ -1,6 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 from selenium.webdriver.firefox.firefox_profile import FirefoxProfile
+from selenium.webdriver.common.action_chains import ActionChains
 import time
 
 import urllib
@@ -11,6 +12,9 @@ from selenium.webdriver.support.ui import Select as WebSelect
 
 import cv2
 import numpy as np
+
+x_pos = 20
+y_pos = 223
 
 def allow_flash(driver, url):
     def _base_url(url):
@@ -45,14 +49,14 @@ def allow_flash(driver, url):
     WebSelect(root11).select_by_value("allow")
 
 def crop(image, y0, y1, x0,x1, image_name):
-    crop_image = image[y0:y1, x0:x1]
-    print(checkValid(crop_image))
-    cv2.imwrite(image_name, crop_image)
+    #crop_image = image[y0:y1, x0:x1]
+    #print(checkValid(crop_image))
+    cv2.imwrite(image_name, image)
 
 def checkValid(image):
     return np.sum(image) > 500
 
-url = "http://www.dot.ca.gov/d5/d5cameras/ct-cam-pop-1atEof41stAve.html"
+url = "http://www.dot.ca.gov/dist8/tmc/cctvhtm/cctv809409.html"
 width = 300
 height = 450
 prefs = {
@@ -77,17 +81,21 @@ with webdriver.Chrome(chrome_options=options) as driver:
     driver.set_window_size(width, height)
     driver.get(url)
     #time.sleep(3)
-    time.sleep(3)
-    driver.find_element_by_tag_name("embed").click()
-    time.sleep(7)
+    video = driver.find_element_by_tag_name("embed")
+    print(video.location)
+    video.click()
+    time.sleep(1.0)
+    actions = ActionChains(driver)
+    actions.move_to_element(driver.find_element_by_id("video")).move_by_offset( -140,103).click().perform()
+    print("click_play")
+    time.sleep(10)
+
     png = driver.get_screenshot_as_png()
     
     img = np.frombuffer(png, np.uint8)
     mat = cv2.imdecode(img, cv2.IMREAD_COLOR)
     print(type(img))
-    name = 'data/test3.png'
-    if (dim == None):
-
+    name = 'data/test4.png'
     crop(mat,  12,311,29, 428,  name)
 
 #driver.close()
